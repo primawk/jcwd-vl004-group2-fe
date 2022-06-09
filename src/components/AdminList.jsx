@@ -9,14 +9,14 @@ import { MdOutlineNoAccounts } from 'react-icons/md';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
-const DeleteAdminModal = ({ adminId, online, setOpenMain, setAdmins, setMaxPage, setTotalAdmins, limit, currentPage }) => {
+const DeleteAdminModal = ({ adminId, setOpenMain, setAdmins, setMaxPage, setTotalAdmins, limit, currentPage }) => {
+  const adminToken = localStorage.getItem('adminToken');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   return (
     <>
       <button
-        // disabled={online}
         onClick={() => setOpen(true)}
         className="w-full h-12 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 disabled:from-red-300 disabled:to-rose-300 flex justify-center items-center gap-1 text-lg font-bold text-white cursor-pointer hover:brightness-125 disabled:hover:brightness-100 active:scale-95 disabled:active:scale-100 transition-all disabled:cursor-default"
       >
@@ -47,17 +47,17 @@ const DeleteAdminModal = ({ adminId, online, setOpenMain, setAdmins, setMaxPage,
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-80 scale-100 -translate-y-5"
           >
-            <div className="fixed w-[530px] bg-sky-50 rounded-xl flex flex-col px-10 shadow-md">
-              <div className="pt-6 flex justify-center">
-                <span className="text-xl font-bold">Are you sure you want to delete this account?</span>
+            <div className="fixed w-[550px] py-6 bg-sky-50 rounded-xl flex flex-col px-10 shadow-md">
+              <div className="flex justify-center">
+                <span className="text-xl font-bold">Are you sure you want to deactivate this account?</span>
               </div>
               <div className="w-full py-5 flex justify-center">
-                <span className="font-semibold">Once you've deleted this account, this action is irreversible</span>
+                <span className="font-semibold">Once you've deactivate this account, you need to manually reactivate it</span>
               </div>
-              <div className="w-full pb-6 pt-2 flex justify-end items-center gap-2">
+              <div className="w-full flex justify-end items-center gap-3">
                 <button
                   onClick={() => setOpen(false)}
-                  className="h-10 w-32 rounded-full bg-gradient-to-r from-red-500 to-rose-400 hover:brightness-125 font-bold text-white active:scale-95 transition"
+                  className="py-3 w-32 rounded-full bg-gradient-to-r from-red-500 to-rose-400 hover:brightness-125 font-bold text-white active:scale-95 transition"
                 >
                   Cancel
                 </button>
@@ -67,10 +67,18 @@ const DeleteAdminModal = ({ adminId, online, setOpenMain, setAdmins, setMaxPage,
                     try {
                       setLoading(true);
 
-                      const response = await Axios.post(`${API_URL}/admin/account/delete/${adminId}`, {
-                        limit: limit,
-                        currentPage: currentPage,
-                      });
+                      const response = await Axios.post(
+                        `${API_URL}/admin/account/delete/${adminId}`,
+                        {
+                          limit: limit,
+                          currentPage: currentPage,
+                        },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${adminToken}`,
+                          },
+                        }
+                      );
 
                       if (response.data.conflict) {
                         setLoading(false);
@@ -82,7 +90,7 @@ const DeleteAdminModal = ({ adminId, online, setOpenMain, setAdmins, setMaxPage,
                         setTotalAdmins(response.data.totalAdmins);
                         setLoading(false);
 
-                        toast.success(response.data.message, { position: 'bottom-left', theme: 'colored' });
+                        toast.info(response.data.message, { position: 'bottom-left', theme: 'colored' });
                         setOpen(false);
                         setOpenMain(false);
                       }
@@ -92,7 +100,7 @@ const DeleteAdminModal = ({ adminId, online, setOpenMain, setAdmins, setMaxPage,
                       toast.error('Unable to delete Admin Account', { position: 'bottom-left', theme: 'colored' });
                     }
                   }}
-                  className="h-10 w-32 rounded-full bg-gradient-to-r from-emerald-500 disabled:from-emerald-300 to-green-400 disabled:to-green-300 hover:brightness-125 disabled:hover:brightness-100 font-bold text-white active:scale-95 disabled:active:scale-100 transition flex justify-center items-center gap-2"
+                  className="py-3 w-32 rounded-full bg-gradient-to-r from-emerald-500 disabled:from-emerald-300 to-green-400 disabled:to-green-300 hover:brightness-125 disabled:hover:brightness-100 font-bold text-white active:scale-95 disabled:active:scale-100 transition flex justify-center items-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -124,14 +132,14 @@ const AdminList = ({ admin, online, setAdmins, setMaxPage, setTotalAdmins, limit
         <div className="w-[7%] flex justify-center items-center">
           <span className="font-bold text-gray-600">{admin.id}</span>
         </div>
-        <div className="w-[20%] pl-2 flex items-center">
-          <span className="font-semibold text-gray-600">{admin.name}</span>
+        <div className="w-[20%] px-2 flex items-center">
+          <span className="font-semibold text-gray-600 truncate">{admin.name}</span>
         </div>
-        <div className="w-[29%] pl-2 flex items-center">
-          <span className="font-semibold text-gray-600">{admin.email}</span>
+        <div className="w-[29%] px-2 flex items-center">
+          <span className="font-semibold text-gray-600 truncate">{admin.email}</span>
         </div>
-        <div className="w-[21%] pl-2 flex items-center">
-          <span className="font-semibold text-gray-600">{admin.username}</span>
+        <div className="w-[21%] px-2 flex items-center">
+          <span className="font-semibold text-gray-600 truncate">{admin.username}</span>
         </div>
         <div className="w-[13%] flex justify-center items-center">
           <div className="h-16 w-16 rounded-full bg-sky-200 flex justify-center items-center">
